@@ -22,6 +22,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import GroupIcon from "@mui/icons-material/Group";
 import React from "react";
+import { authService } from "../services";
 
 const drawerWidth = 240;
 
@@ -103,7 +104,7 @@ export function AppLayout() {
             variant="body2"
             sx={{ cursor: "pointer" }}
             onClick={() => {
-              localStorage.removeItem("hk_token");
+              authService.logout();
               window.location.href = "/login";
             }}
           >

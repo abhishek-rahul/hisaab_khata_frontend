@@ -15,12 +15,11 @@ import { CreateSalePage } from "./pages/sales/CreateSalePage";
 import { SalesPage } from "./pages/sales/SalesPage";
 import { StaffPage } from "./pages/staff/StaffPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-
-// TODO: Replace with real auth state (token)
-const isAuthenticated = () => Boolean(localStorage.getItem("hk_token"));
+import { authService } from "./services";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
-  if (!isAuthenticated()) return <Navigate to="/login" replace />;
+  const session = authService.getSession();
+  if (!session) return <Navigate to="/login" replace />;
   return children;
 }
 
