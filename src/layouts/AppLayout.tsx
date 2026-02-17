@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import React from "react";
+import { authService } from "../services";
 
 const drawerWidth = 240;
 
@@ -68,7 +69,7 @@ export function AppLayout() {
             variant="body2"
             sx={{ cursor: "pointer" }}
             onClick={() => {
-              localStorage.removeItem("hk_token");
+              authService.logout();
               window.location.href = "/login";
             }}
           >
