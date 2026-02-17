@@ -6,7 +6,8 @@ import { authService } from "../../services";
 const ERROR_MESSAGES: Record<string, string> = {
   ALL_FIELDS_REQUIRED: "Please fill in all fields.",
   PASSWORD_TOO_SHORT: "Password must be at least 6 characters.",
-  USER_EMAIL_EXISTS: "An account with this email already exists."
+  USER_EMAIL_EXISTS: "An account with this email already exists.",
+  REGISTRATION_FAILED: "Registration failed. Please try again."
 };
 
 export function RegisterPage() {
@@ -22,6 +23,7 @@ export function RegisterPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
       await authService.register({
         shopName,
@@ -32,7 +34,7 @@ export function RegisterPage() {
       nav("/", { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "REGISTRATION_FAILED";
-      setError(ERROR_MESSAGES[message] ?? "Registration failed. Please try again.");
+      setError(ERROR_MESSAGES[message] ?? ERROR_MESSAGES.REGISTRATION_FAILED);
     } finally {
       setLoading(false);
     }
@@ -41,7 +43,7 @@ export function RegisterPage() {
   return (
     <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", p: 2 }}>
       <Paper sx={{ width: "100%", maxWidth: 420, p: 3 }} elevation={3}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
+        <Typography variant="h5" sx={{ mb: 1 }}>
           Register your shop
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
