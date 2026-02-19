@@ -52,6 +52,32 @@ export function ProductsPage() {
     loadProducts();
   }, [loadProducts]);
 
+  // Auto-refresh when page becomes visible (e.g., after returning from purchase/sale pages)
+  React.useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadProducts();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [loadProducts]);
+
+  // Auto-refresh on window focus (when user switches back to tab)
+  React.useEffect(() => {
+    const handleFocus = () => {
+      loadProducts();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [loadProducts]);
+
   // Filter products by search query
   const filteredProducts = React.useMemo(() => {
     if (!searchQuery.trim()) {
