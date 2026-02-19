@@ -17,9 +17,15 @@ import {
   Select,
   MenuItem,
   TextField,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from "@mui/material";
-import { ledgerService, type LedgerEntry, type LedgerFilter } from "../../services";
+import AddIcon from "@mui/icons-material/Add";
+import { ledgerService, supplierService, customerService, type LedgerEntry, type LedgerFilter, type CreatePaymentRequest, type SupplierWithDue, type CustomerWithDue } from "../../services";
+import { AddPaymentDialog } from "../../components/ledger/AddPaymentDialog";
 
 export function LedgerPage() {
   const [entries, setEntries] = React.useState<LedgerEntry[]>([]);
@@ -29,6 +35,15 @@ export function LedgerPage() {
   const [partyType, setPartyType] = React.useState<"supplier" | "customer" | "all">("all");
   const [startDate, setStartDate] = React.useState("");
   const [endDate, setEndDate] = React.useState("");
+  
+  // Add Payment states
+  const [selectPartyDialogOpen, setSelectPartyDialogOpen] = React.useState(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = React.useState(false);
+  const [selectedPaymentType, setSelectedPaymentType] = React.useState<"supplier" | "customer">("supplier");
+  const [selectedPartyId, setSelectedPartyId] = React.useState<string>("");
+  const [selectedPartyName, setSelectedPartyName] = React.useState<string>("");
+  const [suppliers, setSuppliers] = React.useState<SupplierWithDue[]>([]);
+  const [customers, setCustomers] = React.useState<CustomerWithDue[]>([]);
 
   // Load ledger entries
   const loadEntries = React.useCallback(async () => {
@@ -61,10 +76,47 @@ export function LedgerPage() {
     loadEntries();
   }, [loadEntries]);
 
+  // Load suppliers and customers for payment selection
+  React.useEffect(() => {
+    const loadParties = async () => {
+      try {
+        const [suppliersData, customersData] = await Promise.all([
+          supplierService.getSuppliers(),
+          customerService.getCustomers()
+        ]);
+        setSuppliers(suppliersData);
+        setCustomers(customersData);
+      } catch (err) {
+        console.error("Failed to load parties:", err);
+      }
+    };
+    loadParties();
+  }, []);
+
   const handleClearFilters = () => {
     setPartyType("all");
     setStartDate("");
     setEndDate("");
+  };
+
+  const handleAddPaymentClick = () => {
+    setSelectPartyDialogOpen(true);
+  };
+
+  const handleSelectParty = () => {
+    if (!selectedPartyId) {
+      return;
+    }
+    setSelectPartyDialogOpen(false);
+    setPaymentDialogOpen(true);
+  };
+
+  const handleAddPayment = async (data: CreatePaymentRequest) => {
+    await ledgerService.addPayment(data);
+    await loadEntries(); // Reload to refresh ledger entries
+    setPaymentDialogOpen(false);
+    setSelectedPartyId("");
+    setSelectedPartyName("");
   };
 
   if (loading) {
@@ -81,9 +133,18 @@ export function LedgerPage() {
     <Box>
       <Card sx={{ mb: 2 }}>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Ledger (All Transactions)
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+            <Typography variant="h6">
+              Ledger (All Transactions)
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddPaymentClick}
+            >
+              Add Payment
+            </Button>
+          </Box>
 
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "flex-end" }}>
             <FormControl sx={{ minWidth: 150 }}>
@@ -215,6 +276,81 @@ export function LedgerPage() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Select Party Dialog */}
+      <Dialog open={selectPartyDialogOpen} onClose={() => setSelectPartyDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Select Party for Payment</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+            <FormControl fullWidth required>
+              <InputLabel>Party Type</InputLabel>
+              <Select
+                value={selectedPaymentType}
+                onChange={(e) => {
+                  setSelectedPaymentType(e.target.value as "supplier" | "customer");
+                  setSelectedPartyId("");
+                  setSelectedPartyName("");
+                }}
+                label="Party Type"
+              >
+                <MenuItem value="supplier">Supplier</MenuItem>
+                <MenuItem value="customer">Customer</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth required>
+              <InputLabel>Select {selectedPaymentType === "supplier" ? "Supplier" : "Customer"}</InputLabel>
+              <Select
+                value={selectedPartyId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedPartyId(id);
+                  if (selectedPaymentType === "supplier") {
+                    const supplier = suppliers.find((s) => s.id === id);
+                    setSelectedPartyName(supplier?.name || "");
+                  } else {
+                    const customer = customers.find((c) => c.id === id);
+                    setSelectedPartyName(customer?.name || "");
+                  }
+                }}
+                label={`Select ${selectedPaymentType === "supplier" ? "Supplier" : "Customer"}`}
+              >
+                {(selectedPaymentType === "supplier" ? suppliers : customers).map((party) => (
+                  <MenuItem key={party.id} value={party.id}>
+                    {party.name} {party.dueAmount > 0 && `(Due: ₹${party.dueAmount.toFixed(2)})`}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSelectPartyDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleSelectParty}
+            disabled={!selectedPartyId}
+          >
+            Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Payment Dialog */}
+      {selectedPartyId && selectedPartyName && (
+        <AddPaymentDialog
+          open={paymentDialogOpen}
+          onClose={() => {
+            setPaymentDialogOpen(false);
+            setSelectedPartyId("");
+            setSelectedPartyName("");
+          }}
+          onSubmit={handleAddPayment}
+          type={selectedPaymentType}
+          partyId={selectedPartyId}
+          partyName={selectedPartyName}
+        />
+      )}
     </Box>
   );
 }
