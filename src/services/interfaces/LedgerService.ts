@@ -17,6 +17,7 @@ export interface LedgerEntry {
   referenceId: string; // ID of purchase/sale/payment
   partyId: string; // supplierId or customerId
   partyName: string; // supplier name or customer name
+  partyType: "supplier" | "customer"; // Type of party (supplier or customer)
 }
 
 export interface LedgerFilter {

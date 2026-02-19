@@ -77,7 +77,8 @@ export class LedgerServiceMock implements LedgerService {
             balance,
             referenceId: purchase.id,
             partyId: supplierId,
-            partyName: supplier.name
+            partyName: supplier.name,
+            partyType: "supplier"
           });
         }
       } else {
@@ -93,7 +94,8 @@ export class LedgerServiceMock implements LedgerService {
           balance,
           referenceId: payment.id,
           partyId: supplierId,
-          partyName: supplier.name
+          partyName: supplier.name,
+          partyType: "supplier"
         });
       }
     }
@@ -155,7 +157,8 @@ export class LedgerServiceMock implements LedgerService {
             balance,
             referenceId: sale.id,
             partyId: customerId,
-            partyName: customer.name
+            partyName: customer.name,
+            partyType: "customer"
           });
         }
       } else {
@@ -171,7 +174,8 @@ export class LedgerServiceMock implements LedgerService {
           balance,
           referenceId: payment.id,
           partyId: customerId,
-          partyName: customer.name
+          partyName: customer.name,
+          partyType: "customer"
         });
       }
     }
@@ -203,34 +207,40 @@ export class LedgerServiceMock implements LedgerService {
         // Try both
         const supplier = mockStore.getSupplierById(filter.partyId);
         if (supplier && supplier.tenantId === tenantId) {
-          allEntries.push(...this.getSupplierLedger(filter.partyId));
+          const supplierEntries = await this.getSupplierLedger(filter.partyId);
+          allEntries.push(...supplierEntries);
         }
         const customer = mockStore.getCustomerById(filter.partyId);
         if (customer && customer.tenantId === tenantId) {
-          allEntries.push(...this.getCustomerLedger(filter.partyId));
+          const customerEntries = await this.getCustomerLedger(filter.partyId);
+          allEntries.push(...customerEntries);
         }
       }
     } else if (filter?.type === "supplier") {
       // Get all supplier ledgers
       const suppliers = mockStore.getSuppliersByTenant(tenantId);
       for (const supplier of suppliers) {
-        allEntries.push(...this.getSupplierLedger(supplier.id));
+        const supplierEntries = await this.getSupplierLedger(supplier.id);
+        allEntries.push(...supplierEntries);
       }
     } else if (filter?.type === "customer") {
       // Get all customer ledgers
       const customers = mockStore.getCustomersByTenant(tenantId);
       for (const customer of customers) {
-        allEntries.push(...this.getCustomerLedger(customer.id));
+        const customerEntries = await this.getCustomerLedger(customer.id);
+        allEntries.push(...customerEntries);
       }
     } else {
       // Get all ledgers (suppliers + customers)
       const suppliers = mockStore.getSuppliersByTenant(tenantId);
       for (const supplier of suppliers) {
-        allEntries.push(...this.getSupplierLedger(supplier.id));
+        const supplierEntries = await this.getSupplierLedger(supplier.id);
+        allEntries.push(...supplierEntries);
       }
       const customers = mockStore.getCustomersByTenant(tenantId);
       for (const customer of customers) {
-        allEntries.push(...this.getCustomerLedger(customer.id));
+        const customerEntries = await this.getCustomerLedger(customer.id);
+        allEntries.push(...customerEntries);
       }
     }
 

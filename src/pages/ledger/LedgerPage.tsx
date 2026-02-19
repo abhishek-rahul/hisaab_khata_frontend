@@ -163,9 +163,9 @@ export function LedgerPage() {
                         {entry.partyName}
                       </Typography>
                       <Chip
-                        label={entry.type === "supplier" ? "Supplier" : "Customer"}
+                        label={entry.partyType === "supplier" ? "Supplier" : "Customer"}
                         size="small"
-                        color={entry.type === "supplier" ? "primary" : "secondary"}
+                        color={entry.partyType === "supplier" ? "primary" : "secondary"}
                         variant="outlined"
                         sx={{ mt: 0.5 }}
                       />
@@ -192,14 +192,14 @@ export function LedgerPage() {
                   </TableCell>
                   <TableCell align="right">
                     {entry.credit > 0 && (
-                      <Typography color={entry.type === "supplier" ? "error" : "success.main"} fontWeight="bold">
+                      <Typography color={entry.partyType === "supplier" ? "error" : "success.main"} fontWeight="bold">
                         ₹{entry.credit.toFixed(2)}
                       </Typography>
                     )}
                   </TableCell>
                   <TableCell align="right">
                     {entry.debit > 0 && (
-                      <Typography color={entry.type === "customer" ? "error" : "success.main"} fontWeight="bold">
+                      <Typography color={entry.partyType === "customer" ? "error" : "success.main"} fontWeight="bold">
                         ₹{entry.debit.toFixed(2)}
                       </Typography>
                     )}
