@@ -4,15 +4,18 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { authService } from "../../services";
 
 const ERROR_MESSAGES: Record<string, string> = {
-  EMAIL_AND_PASSWORD_REQUIRED: "Please enter email and password.",
-  INVALID_CREDENTIALS: "Invalid email or password.",
-  TENANT_NOT_FOUND: "Account configuration error. Please contact support."
+  ALL_FIELDS_REQUIRED: "Please fill in all fields.",
+  PASSWORD_TOO_SHORT: "Password must be at least 6 characters.",
+  USER_EMAIL_EXISTS: "An account with this email already exists.",
+  REGISTRATION_FAILED: "Registration failed. Please try again."
 };
 
-export function LoginPage() {
+export function RegisterPage() {
   const nav = useNavigate();
-  const [email, setEmail] = React.useState("owner@example.com");
-  const [password, setPassword] = React.useState("password");
+  const [shopName, setShopName] = React.useState("");
+  const [ownerName, setOwnerName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 
@@ -20,12 +23,18 @@ export function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
-      await authService.login({ email, password });
+      await authService.register({
+        shopName,
+        ownerName,
+        email,
+        password
+      });
       nav("/", { replace: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "LOGIN_FAILED";
-      setError(ERROR_MESSAGES[message] ?? "Login failed. Please try again.");
+      const message = err instanceof Error ? err.message : "REGISTRATION_FAILED";
+      setError(ERROR_MESSAGES[message] ?? ERROR_MESSAGES.REGISTRATION_FAILED);
     } finally {
       setLoading(false);
     }
@@ -34,11 +43,28 @@ export function LoginPage() {
   return (
     <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", p: 2 }}>
       <Paper sx={{ width: "100%", maxWidth: 420, p: 3 }} elevation={3}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          Login
+        <Typography variant="h5" sx={{ mb: 1 }}>
+          Register your shop
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Create your tenant and owner account to get started.
         </Typography>
 
         <Box component="form" onSubmit={onSubmit} sx={{ display: "grid", gap: 2 }}>
+          <TextField
+            label="Shop name"
+            value={shopName}
+            onChange={(e) => setShopName(e.target.value)}
+            fullWidth
+            required
+          />
+          <TextField
+            label="Your name"
+            value={ownerName}
+            onChange={(e) => setOwnerName(e.target.value)}
+            fullWidth
+            required
+          />
           <TextField
             label="Email"
             type="email"
@@ -54,6 +80,7 @@ export function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             fullWidth
             required
+            helperText="At least 6 characters"
           />
 
           {error && (
@@ -63,13 +90,13 @@ export function LoginPage() {
           )}
 
           <Button type="submit" variant="contained" disabled={loading}>
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? "Creating…" : "Register"}
           </Button>
 
           <Typography variant="body2" color="text.secondary">
-            Don&apos;t have an account?{" "}
-            <Link component={RouterLink} to="/register">
-              Register your shop
+            Already have an account?{" "}
+            <Link component={RouterLink} to="/login">
+              Sign in
             </Link>
           </Typography>
         </Box>
