@@ -19,6 +19,9 @@ import { PurchaseServiceHttp } from "./http/PurchaseServiceHttp";
 import type { SaleService } from "./interfaces/SaleService";
 import { SaleServiceMock } from "./mock/SaleServiceMock";
 import { SaleServiceHttp } from "./http/SaleServiceHttp";
+import type { StaffService } from "./interfaces/StaffService";
+import { StaffServiceMock } from "./mock/StaffServiceMock";
+import { StaffServiceHttp } from "./http/StaffServiceHttp";
 
 const dataMode = import.meta.env.VITE_DATA_MODE || "mock";
 
@@ -42,6 +45,9 @@ export const purchaseService: PurchaseService =
 
 export const saleService: SaleService =
   dataMode === "mock" ? new SaleServiceMock() : new SaleServiceHttp();
+
+export const staffService: StaffService =
+  dataMode === "mock" ? new StaffServiceMock() : new StaffServiceHttp();
 
 export type { AuthService, LoginCredentials, RegisterRequest, Session } from "./interfaces/AuthService";
 export type {
@@ -80,3 +86,8 @@ export type {
   CreateSaleRequest,
   UpdateSaleRequest
 } from "./interfaces/SaleService";
+export type {
+  StaffService,
+  CreateStaffRequest,
+  UpdateStaffRequest
+} from "./interfaces/StaffService";
