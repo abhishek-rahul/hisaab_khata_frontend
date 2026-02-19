@@ -22,6 +22,9 @@ import { SaleServiceHttp } from "./http/SaleServiceHttp";
 import type { StaffService } from "./interfaces/StaffService";
 import { StaffServiceMock } from "./mock/StaffServiceMock";
 import { StaffServiceHttp } from "./http/StaffServiceHttp";
+import type { DashboardService } from "./interfaces/DashboardService";
+import { DashboardServiceMock } from "./mock/DashboardServiceMock";
+import { DashboardServiceHttp } from "./http/DashboardServiceHttp";
 
 const dataMode = import.meta.env.VITE_DATA_MODE || "mock";
 
@@ -48,6 +51,9 @@ export const saleService: SaleService =
 
 export const staffService: StaffService =
   dataMode === "mock" ? new StaffServiceMock() : new StaffServiceHttp();
+
+export const dashboardService: DashboardService =
+  dataMode === "mock" ? new DashboardServiceMock() : new DashboardServiceHttp();
 
 export type { AuthService, LoginCredentials, RegisterRequest, Session } from "./interfaces/AuthService";
 export type {
@@ -91,3 +97,7 @@ export type {
   CreateStaffRequest,
   UpdateStaffRequest
 } from "./interfaces/StaffService";
+export type {
+  DashboardService,
+  DashboardMetrics
+} from "./interfaces/DashboardService";
