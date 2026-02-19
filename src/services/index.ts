@@ -13,6 +13,9 @@ import { CustomerServiceHttp } from "./http/CustomerServiceHttp";
 import type { LedgerService } from "./interfaces/LedgerService";
 import { LedgerServiceMock } from "./mock/LedgerServiceMock";
 import { LedgerServiceHttp } from "./http/LedgerServiceHttp";
+import type { PurchaseService } from "./interfaces/PurchaseService";
+import { PurchaseServiceMock } from "./mock/PurchaseServiceMock";
+import { PurchaseServiceHttp } from "./http/PurchaseServiceHttp";
 
 const dataMode = import.meta.env.VITE_DATA_MODE || "mock";
 
@@ -30,6 +33,9 @@ export const customerService: CustomerService =
 
 export const ledgerService: LedgerService =
   dataMode === "mock" ? new LedgerServiceMock() : new LedgerServiceHttp();
+
+export const purchaseService: PurchaseService =
+  dataMode === "mock" ? new PurchaseServiceMock() : new PurchaseServiceHttp();
 
 export type { AuthService, LoginCredentials, RegisterRequest, Session } from "./interfaces/AuthService";
 export type {
@@ -56,3 +62,9 @@ export type {
   LedgerFilter,
   CreatePaymentRequest
 } from "./interfaces/LedgerService";
+export type {
+  PurchaseService,
+  PurchaseWithDetails,
+  CreatePurchaseRequest,
+  UpdatePurchaseRequest
+} from "./interfaces/PurchaseService";
